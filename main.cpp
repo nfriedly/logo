@@ -2,6 +2,8 @@
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_mixer.h>
 
+#include <cmath>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "assets.h"
@@ -28,6 +30,17 @@
 
 //---------------------------------------------------//
 
+void exit_event() {
+	SDL_Event event;
+	while (SDL_PollEvent(&event)) {
+		switch (event.type) {
+			case SDL_KEYDOWN:
+				exit(0);
+				break;
+		}
+	}
+}
+
 
 int main(int argc, char* argv[]) {
 	if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO) != 0) {
@@ -45,8 +58,12 @@ int main(int argc, char* argv[]) {
 	RWops = SDL_RWFromConstMem(png_logo_pocketgo, sizeof(png_logo_pocketgo));
 #elif VERSION_POWKIDDY
 	RWops = SDL_RWFromConstMem(png_logo_powkiddy, sizeof(png_logo_powkiddy));
-#else
+#elif VERSION_BITTBOY
 	RWops = SDL_RWFromConstMem(png_logo_bittboy, sizeof(png_logo_bittboy));
+#elif VERSION_GENERIC
+	RWops = SDL_RWFromConstMem(png_logo_generic, sizeof(png_logo_generic));
+#else
+	RWops = SDL_RWFromConstMem(png_logo_miyoo, sizeof(png_logo_miyoo));
 #endif
 	
     logoimg = IMG_LoadPNG_RW(RWops);
@@ -73,7 +90,9 @@ int main(int argc, char* argv[]) {
 	uint32_t color = SDL_MapRGB(screen->format, R, G, B);
 	SDL_Rect rect;
 	SDL_Rect dstrect;
+	SDL_Event event;
 	for (int i = 0 - logoimg->h - ANIMDELAY; i <= dest_y; i = i + ANIMSPEED) {
+		exit_event();
 		rect.x = 0;
 		rect.y = 0;
 		rect.w = screen->w;
@@ -93,8 +112,15 @@ int main(int argc, char* argv[]) {
 		old_time = curr_time;
 		SDL_Flip(screen);
 	}
-
-	SDL_Delay(ENDDELAY);
+	
+	while(Mix_Playing(-1)) {
+		exit_event();
+	}
+	
+	for (int j = 0 ; j < (sqrt(2+8*ENDDELAY)-1)/2; j++){
+		SDL_Delay(j);
+		exit_event();
+	}
 
 	SDL_FreeRW(RWops);
 	SDL_FreeRW(RWops2);

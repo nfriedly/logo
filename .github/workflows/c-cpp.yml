@@ -1,0 +1,48 @@
+# based on https://github.com/MiyooCFW/gmenunx/blob/master/.github/workflows/c-cpp.yml
+name: CI Build
+
+on: [push, pull_request]
+
+jobs:   
+  build-modern:
+    name: boot logos for MiyooCFW (musl libc)
+    runs-on: ubuntu-20.04
+    container:
+      image: nfriedly/miyoo-toolchain:latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: build BittBoy
+      run: make -f Makefile.bittboy
+    - uses: actions/upload-artifact@v2
+      with:
+        name: BittBoy boot logo
+        path: boot-logo
+        if-no-files-found: error # 'error', 'warn', 'ignore'; defaults to `warn`
+    - name: build PocketGO
+      run: make -f Makefile.bittboy clean; make -f Makefile.pocketgo
+    - uses: actions/upload-artifact@v2
+      with:
+        name: PocketGO boot logo
+        path: boot-logo
+        if-no-files-found: error # 'error', 'warn', 'ignore'; defaults to `warn`
+    - name: build PowKiddy
+      run: make -f Makefile.pocketgo clean; make -f Makefile.powkiddy
+    - uses: actions/upload-artifact@v2
+      with:
+        name: PowKiddy boot logo
+        path: boot-logo
+        if-no-files-found: error # 'error', 'warn', 'ignore'; defaults to `warn`
+    - name: build Miyoo
+      run: make -f Makefile.powkiddy clean; make -f Makefile.miyoo
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Miyoo boot logo
+        path: boot-logo
+        if-no-files-found: error # 'error', 'warn', 'ignore'; defaults to `warn`
+    - name: build Generic
+      run: make -f Makefile.miyoo clean; make -f Makefile.generic
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Generic boot logo
+        path: boot-logo
+        if-no-files-found: error # 'error', 'warn', 'ignore'; defaults to `warn`
